@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+
+
+{% block content %}
+<form id="formProduct">
+    {% csrf_token %}
+    <label for="name">Название</label><input type="text" name="name"><br>
+    <label for="description">Описание</label><input type="textarea" name="description"><br>
+    <label for="price">Цена</label><input type="number" name="price"><br>
+    <button type="submit">Добавить продукт</button>
+</form>
+
+<button onclick="get_products()">Показать список продуктов</button>
+
+
+<script>
+    async function get_products() {
+        let response = await fetch('api/v1/productlist/');
+        if(response.ok) {
+            let result = await response.json();
+            console.log(result);
+            var data = JSON.stringify(result)
+            data = JSON.parse(data)
+            const rows = document.querySelector("tbody");
+            rows.innerHTML = ''
+            data.forEach((p) => rows.append(row(p)));
+        };
+    };
+
+    formProduct.onsubmit = async (e) => {
+        e.preventDefault();
+
+        let response = await fetch('api/v1/productlist/', {
+            method: 'POST',
+            body: new FormData(formProduct)
+        });
+        if(response.ok) {
+            get_products()
+            };
+        };
+   
+
+function row(product) {
+  
+const tr = document.createElement("tr");
+tr.setAttribute("data-name", product.name);
+
+const nameTd = document.createElement("td");
+nameTd.setAttribute("style", "cursor:pointer;padding:15px");
+nameTd.append(product.name);
+
+tr.append(nameTd);
+
+const descriptionTd = document.createElement("td");
+descriptionTd.setAttribute("style", "cursor:pointer;padding:15px");
+descriptionTd.append(product.description);
+
+tr.append(descriptionTd);
+
+const priceTd = document.createElement("td");
+priceTd.setAttribute("style", "cursor:pointer;padding:15px");
+priceTd.append(product.price);
+
+tr.append(priceTd);
+
+return tr;
+}
+</script>
+
+<table id="tableProduct"> 
+    <thead>
+      <td>Название</td>
+      <td>Описание</td>
+      <td>Цена</td>
+    </thead>
+    <tbody>
+
+    </tbody>
+  </table>
+
+{% endblock %}
